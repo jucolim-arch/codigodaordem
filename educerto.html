@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Códice da Ordem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&family=Alegreya+Sans+SC:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: sereno e confiante, como um mentor de uma ordem secreta; encoraja, nunca pune.
+   IDEA: o códice de um aprendiz numa cidade renascentista: cada dia é uma página, cada tarefa um treino.
+   PICTURE: silhueta de telhados ao entardecer no topo; o calendário é o mapa da cidade.
+   COLOUR and TYPE: pergaminho e tinta, carmesim, latão; anil para EDO, oliva para Estática; IM Fell English SC + Alegreya Sans.
+   LAYOUT: mesmo esqueleto do diário: faixa do entardecer, calendário, página do dia com lista e pergaminho. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ece4d4,#15120e);--ink:light-dark(#1b1712,#ece4d4);--mute:light-dark(#685d50,#a99c88);
+--card:light-dark(#f7f2e7,#221d17);--edge:light-dark(#bba985,#4a3f31);
+--sea:light-dark(#8e1a1e,#b0282e);--porto:light-dark(#dcdcd2,#1c201c);
+--edo:#34558f;--est:#5d7a3a;--ga:#2f7f7a;--geral:light-dark(#8f6b1f,#c49a3a);--boss:#9e1b1f;--gold:#c49a3a;
+--parch:light-dark(#efe1bf,#2a241b);--parche:light-dark(#8a6a3a,#8f7448);--grid:light-dark(rgba(90,60,20,.08),rgba(255,230,180,.05))}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 'Alegreya Sans',system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.dn,.lil{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;line-height:1.05;text-wrap:balance;margin:0}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(22px,3.5vw,48px) max(5vw,16px)}
+.ic{width:22px;height:22px;flex:none}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+button{font:inherit;color:inherit}
+.brick{position:relative;background:var(--card);border:2px solid var(--bc,var(--edge));border-radius:4px;margin-top:9px;box-shadow:4px 4px 0 rgba(0,0,0,.14)}
+.brick::before{content:"";position:absolute;left:14px;top:-7px;width:12px;height:12px;background:var(--bc,var(--edge));transform:rotate(45deg);pointer-events:none}
+/* topo */
+header{position:relative;overflow:hidden;background:linear-gradient(180deg,#221b2a 0%,#47232a 62%,#6e2e22 100%);color:#f3ead8;padding-bottom:96px!important}
+header .wrap{position:relative;z-index:1}
+.sky{position:absolute;left:0;bottom:0;width:100%;height:92px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
+h1{font-size:clamp(30px,4.4vw,46px);max-width:24ch}
+.rank{display:inline-flex;align-items:center;gap:10px;padding:8px 16px;color:var(--ink);font-weight:800;--bc:var(--gold)}
+.rank .lil{font-size:22px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+.stat{padding:12px 14px;color:var(--ink)}
+.stat small{display:block;color:var(--mute);font-weight:700;font-size:14px}
+.stat .lil{font-size:clamp(26px,4vw,36px)}
+.bar{height:10px;border-radius:5px;background:var(--porto);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.route{display:flex;align-items:center;gap:6px;margin-top:20px}
+.route span{font-weight:800;margin-right:6px;white-space:nowrap}
+.route i{flex:1;height:20px;border-radius:2px;transform:skewX(-20deg);background:rgba(255,255,255,.18);border-bottom:4px solid rgba(0,0,0,.22)}
+.route i.on{background:var(--gold)}
+.route .chest{width:40px;height:40px;color:var(--gold)}
+.streak{margin:10px 0 0;font-weight:700;opacity:.92}
+/* calendário */
+.mission{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;margin-bottom:26px}
+.mission b{font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:14px 8px}
+.wd{font-weight:800;font-size:14px;color:var(--mute);text-align:center}
+.cell{min-height:108px;padding:8px 9px;text-align:left;display:flex;flex-direction:column;gap:5px;cursor:pointer;--pw:40px;--ps:20px}
+.cell:hover{transform:translateY(-2px)}
+.cell.out{opacity:.38;cursor:default;transform:none}
+.cell.porto{background:var(--porto)}
+.cell.boss{--bc:#a82618;background:var(--boss);color:#fff}
+.cell.gold{--bc:#8f6b1f;background:var(--gold);color:#241a05}
+.cell.today{outline:3px solid var(--ink);outline-offset:3px}
+.cell .hd{display:flex;align-items:baseline;justify-content:space-between;gap:4px}
+.dn{font-size:24px}.mo{font-size:13px;font-weight:800;opacity:.75}
+.cname{font-weight:800;font-size:14px;line-height:1.15}.ctiny{display:none;font-weight:800;font-size:13px}
+.pips{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto}
+.pip{width:18px;height:12px;border-radius:3px;border:2px solid var(--c)}.pip.on{background:var(--c)}
+.edo{--c:var(--edo)}.ga{--c:var(--ga)}.est{--c:var(--est)}.geral{--c:var(--geral)}.boss{--c:var(--boss)}
+.gold .pip{--c:#7a5600}
+.under{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin-top:34px}
+.panel{padding:18px 20px}
+.panel h3{font-size:24px;margin-bottom:10px}
+.leg{display:flex;flex-wrap:wrap;gap:10px 18px;list-style:none;padding:0;margin:0}
+.leg li{display:flex;align-items:center;gap:8px;font-weight:600}
+.sw{width:22px;height:16px;border-radius:4px;background:var(--c);flex:none}
+.achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:4px 12px;margin-top:6px}
+.ach{display:flex;gap:10px;align-items:center;padding:10px 12px;--pw:40px;--ps:20px}
+.ach.lock{opacity:.5}.ach.ok{--bc:var(--gold)}.ach.ok .ic{color:#c18700}
+.ach b{display:block;line-height:1.2}.ach small{color:var(--mute);line-height:1.3;display:block}
+.cfg label{display:flex;gap:10px;align-items:flex-start;font-weight:700;cursor:pointer}
+.cfg input{width:22px;height:22px;margin-top:2px;accent-color:var(--sea);flex:none}
+.cfg p{margin:6px 0 14px 32px;color:var(--mute);font-size:15px}
+/* página do dia */
+.dnav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}
+.dnav .sp{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:4px;border:0;border-bottom:5px solid rgba(0,0,0,.28);background:var(--b,var(--sea));color:#fff;font-weight:800;cursor:pointer}
+.btn:active{transform:translateY(3px);border-bottom-width:2px}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--edge);border-bottom-width:5px}
+.btn.big{width:100%;font-size:18px;min-height:56px}
+.btn:disabled{opacity:.4;cursor:default}
+.dtitle{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:6px}
+.dtitle h2{font-size:clamp(32px,5vw,46px)}
+.dsub{color:var(--mute);font-weight:700;margin:0 0 20px}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:22px;align-items:start}
+.tlist{display:grid;gap:6px}
+.task{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 6px;width:100%;--pw:52px}
+.tsel{flex:1;display:flex;align-items:center;gap:12px;padding:6px 8px;background:none;border:0;text-align:left;cursor:pointer;min-width:0}
+.task.sel{--bc:var(--c)}
+.tic{width:42px;height:42px;border-radius:4px;display:grid;place-items:center;background:var(--c);color:#fff;flex:none}
+.task b{display:block;line-height:1.2}.task small{color:var(--mute);font-weight:700}
+.tst{width:38px;height:38px;border-radius:50%;border:3px solid var(--edge);background:transparent;display:grid;place-items:center;flex:none;cursor:pointer;padding:0;color:inherit}
+.tst:hover{border-color:var(--est)}
+.task.done .tst{background:var(--est);border-color:var(--est);color:#fff}
+.scrollc{background-color:var(--parch);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;--bc:var(--parche);padding:22px clamp(16px,3vw,28px) 24px;--pw:104px}
+.kick{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--parche);font-size:15px}
+.scrollc h3{font-size:clamp(28px,4vw,38px);margin:6px 0 4px}
+.focus{font-weight:700;margin:0 0 6px}
+.steps{margin:14px 0 18px;padding-left:0;list-style:none;counter-reset:s;display:grid;gap:10px}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start}
+.steps li::before{content:counter(s);font-family:'Alegreya Sans SC';flex:none;width:30px;height:30px;border-radius:8px;background:var(--c);color:#fff;display:grid;place-items:center;border-bottom:3px solid rgba(0,0,0,.25)}
+.timer{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:16px;border-radius:12px;background:var(--card);border:2px solid var(--parche);margin-bottom:14px}
+#tm{font:clamp(46px,9vw,66px)/1 'Alegreya Sans SC',sans-serif;font-variant-numeric:tabular-nums;min-width:4.2ch}
+.tinfo{flex:1 1 160px}.tinfo b{display:block}.tinfo small{color:var(--mute);font-weight:700}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap}
+.phone{display:flex;gap:8px;align-items:center;font-weight:800;color:var(--boss);margin:0 0 14px}
+.rest{padding:22px;--bc:var(--est)}
+details.anti{margin-top:22px;padding:14px 18px}
+details.anti summary{cursor:pointer;font-weight:800;min-height:28px}
+details.anti ul{margin:10px 0 0;padding-left:20px;display:grid;gap:6px}
+.cfgbtns{display:flex;gap:10px;flex-wrap:wrap}
+.segs{display:flex;flex-wrap:wrap;gap:6px;width:100%}.segs:empty{display:none}
+.seg{min-width:max-content;padding:4px 10px;border-radius:7px;background:var(--porto);font-size:13px;font-weight:800;border-bottom:3px solid rgba(0,0,0,.15);white-space:nowrap}
+.seg.on{background:var(--c);color:#fff}.seg.ok{opacity:.55;text-decoration:line-through}
+.steps li.now{font-weight:800}.steps li.now::before{background:var(--gold);color:#3b2a00}
+.hint{color:var(--mute);margin:0 0 12px;font-size:15px}
+.nrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.nrow label{display:grid;font-weight:700;font-size:14px;gap:2px}
+.nrow input{width:74px;font:16px 'Alegreya Sans',sans-serif;min-height:44px;padding:6px 8px;border-radius:8px;border:2px solid var(--edge);background:var(--bg);color:var(--ink)}
+.res{margin:10px 0 18px;font-weight:700}
+.mg{display:block;margin:12px 0 2px}
+.tp{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--edge)}
+.chip{min-height:44px;padding:4px 14px;border-radius:999px;border:2px solid var(--edge);background:var(--card);font-weight:800;cursor:pointer;white-space:nowrap;flex:none}
+.chip.s1{background:var(--boss);color:#fff;border-color:transparent}.chip.s2{background:var(--gold);color:#3b2a00;border-color:transparent}.chip.s3{background:var(--est);color:#fff;border-color:transparent}
+.topr{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.mapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px;align-items:start}
+.mini{position:sticky;top:8px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:12px 16px;margin:18px max(5vw,16px) 0;--bc:var(--boss)}
+#mtm{font-size:clamp(32px,6vw,44px);font-variant-numeric:tabular-nums;min-width:4ch}
+.minfo{flex:1 1 200px}.minfo small{display:block;color:var(--mute);font-weight:700}.minfo b{display:block;line-height:1.2}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,140%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:800;max-width:min(92vw,520px);text-align:center;transition:transform .3s,opacity .3s;z-index:9;opacity:0;pointer-events:none}
+#toast.show{transform:translate(-50%,0);opacity:1}
+.pop{animation:pop .45s ease-out}
+@keyframes pop{40%{transform:scale(1.06)}}
+[hidden]{display:none!important}
+@media(max-width:820px){.dgrid,.under{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){
+ .stats{gap:8px}.stat{padding:10px}.stat small{font-size:13px}
+ .grid{gap:10px 4px}.cell{min-height:74px;padding:5px;--pw:20px}.dn{font-size:18px}.mo{display:none}
+ .pip{width:9px;height:9px}.cname{display:none}.ctiny{display:inline}.cell .ic{width:18px;height:18px}
+ .wd{font-size:13px}.route span{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.cell:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="band">
+ <svg class="sky" viewBox="0 0 1200 92" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+ <path fill="#000" fill-opacity=".28" d="M0 92V58h50V46l20-12 20 12v12h60V40h18V28l9-14 9 14v12h18v52zM300 92V52h70l22-18 22 18v40zM470 92V44h40V30h14v14h46v48zM640 92V56h80V36l26-16 26 16v56zM850 92V48h50l16-14 16 14h70v44zM1030 92V40h22V26l10-14 10 14v14h24v52zM1110 92V54h90v38z"/>
+ <path fill="#120d12" d="M0 92V70h70V60h40v32zM110 92V64l30-18 30 18v28zM170 92V74h50V56h26v36zM246 92V30h24V18l8-14 8 14v12h24v62zM330 92V72h90v20zM420 92V66h30V52h40v40zM490 92V60h40a50 50 0 0 1 100 0h40v32zM575 12V2h10v10zM690 92V72h70V58h40v34zM800 92V22l12-18 12 18v70zM824 92V68h80v24zM904 92V60l34-20 34 20v32zM972 92V74h70V62h30v30zM1072 92V48h20V36l9-12 9 12v12h20v44zM1130 92V70h70v22z"/>
+</svg>
+ <div class="wrap">
+  <div class="top">
+   <h1>Oi Edu,<br>bem‑vindo ao seu códice</h1>
+   <div class="topr"><button class="btn ghost" type="button" data-map style="margin-top:9px"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3zM9 4v13M15 7v13"/></svg>Mapa dos temas</button>
+   <div class="rank brick"><span id="rankIc"></span><div><small style="display:block;color:var(--mute);font-size:13px;line-height:1">Posto</small><span class="lil" id="rank">Recruta</span></div></div></div>
+  </div>
+  <div class="stats">
+   <div class="stat brick"><small>Pontos</small><span class="lil" id="pts">0</span> <small id="ptsTot" style="display:inline"></small></div>
+   <div class="stat brick"><small>Nível</small><span class="lil" id="lvl">1</span><div class="bar"><i id="lvlBar"></i></div><small id="lvlNext" style="font-size:13px"></small></div>
+   <div class="stat brick"><small>Conquistas</small><span class="lil" id="achN">0/6</span></div>
+  </div>
+  <div class="route" id="route" aria-label="Caminho pelos telhados"></div>
+  <p class="streak" id="streak"></p>
+ </div>
+</header>
+<main class="wrap">
+ <div class="mini brick" id="mini" hidden>
+  <span class="lil" id="mtm">0:00</span>
+  <div class="minfo"><small id="mph"></small><b id="mname"></b></div>
+  <div class="tbtns"><button class="btn" id="mgo" type="button" style="--b:var(--boss)"></button><button class="btn ghost" id="mback" data-go="" type="button">Voltar ao bloco</button></div>
+ </div>
+ <section id="cal" class="band">
+  <div class="mission brick" id="mission"></div>
+  <div class="grid" id="grid"></div>
+  <div class="under">
+   <div class="panel brick">
+    <h3>Legenda</h3>
+    <ul class="leg">
+     <li><span class="sw edo"></span>EDO</li><li><span class="sw est"></span>Estática</li><li><span class="sw ga"></span>Gestão Ambiental</li><li><span class="sw geral"></span>Geral</li>
+     <li><span class="sw boss"></span>Dia de prova (missão)</li><li><span class="sw" style="background:var(--porto);border:2px solid var(--edge)"></span>Refúgio (descanso)</li>
+     <li><span class="sw" style="background:var(--gold)"></span>Dia completo</li>
+    </ul>
+    <p style="margin:14px 0 0;color:var(--mute)">Marca vazada = tarefa pendente; marca cheia = feita. Pontos contam esforço, não nota. Bloco 10 · simulado 25 · prova feita 50. Descanso não quebra a sequência e não existe game over: perdeu um dia, segue no próximo.</p>
+   </div>
+   <div class="panel brick">
+    <h3>Recompensas</h3>
+    <ul style="margin:0;padding-left:20px;display:grid;gap:6px">
+     <li>Cumpriu os blocos do dia: pode jogar depois.</li>
+     <li>Subiu de nível: prêmio pequeno combinado.</li>
+     <li>Depois de 17/12: o prêmio grande.</li>
+    </ul>
+   </div>
+  </div>
+  <div class="panel brick" style="margin-top:24px">
+   <h3>Conquistas</h3>
+   <div class="achs" id="achs"></div>
+  </div>
+  <div class="panel brick" style="margin-top:24px">
+   <h3>Placar das notas</h3>
+   <p class="hint">Lance as notas quando saírem. As contas seguem os planos de aula.</p>
+   <div class="under" style="margin-top:0">
+    <div><b>EDO</b>
+    <div class="nrow"><label>P1<input data-n="e1" inputmode="decimal"></label><label>P2<input data-n="e2" inputmode="decimal"></label><label>P3<input data-n="e3" inputmode="decimal"></label></div>
+    <p class="res" id="edoRes"></p></div>
+    <div><b>Estática</b>
+    <div class="nrow"><label>P1<input data-n="s1" inputmode="decimal"></label><label>P2<input data-n="s2" inputmode="decimal"></label><label>P3<input data-n="s3" inputmode="decimal"></label><label>P4<input data-n="s4" inputmode="decimal"></label><label>Listas<input data-n="sl" inputmode="decimal" placeholder="10"></label></div>
+    <p class="res" id="estRes"></p></div>
+   </div>
+  </div>
+  <div class="cfgbtns" style="margin-top:24px"><button class="btn ghost" id="reset" type="button">Zerar progresso</button></div>
+ </section>
+ <section id="day" class="band" hidden></section>
+ <section id="mapaView" class="band" hidden>
+  <div class="dnav"><button class="btn ghost" data-go="" type="button"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M5 12l6 6M5 12l6-6"/></svg>Calendário</button></div>
+  <h2 style="font-size:clamp(32px,5vw,46px);margin-bottom:8px">Mapa dos temas</h2>
+  <p class="hint" style="max-width:62ch">Toque em cada tema para marcar: não sei, mais ou menos, sei. Dentro de cada bloco, comece pelo que estiver vermelho.</p>
+  <div class="mapgrid" id="mapa"></div>
+ </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+{
+const P={leaf:'<path d="M5 21c.5-4.5 2.5-8 7-10M6.5 17.5C4 13 6 5 20 4c-.5 13-8 15-13.5 13.5z"/>',feather:'<path d="M20 4C11 4 6 10 6 18M6 18l-2 2M6 18h7a7 7 0 0 0 7-7V4M10 14h6"/>',tower:'<path d="M8 21V9l4-6 4 6v12M6 21h12M10 21v-4h4v4M8 9h8M11 12h2"/>',moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/>',seal:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7l1.5 3.2 3.5.4-2.6 2.4.7 3.5L12 14.8l-3.1 1.7.7-3.5L7 10.6l3.5-.4z"/>',flag:'<path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/>',compass:'<circle cx="12" cy="12" r="9"/><path d="M8 16l2-6 6-2-2 6z"/>',
+anchor:'<circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V21M5 13a7 7 0 0 0 14 0M3 13h3M18 13h3"/>',
+isle:'<path d="M3 20c3-2.5 15-2.5 18 0M12 19V10M12 10C10 7 7 7 5 8.5M12 10c2-3 5-3 7-1.5M12 10c-1.5-3-.5-5.5 2-6.5M12 10c.5-3-1-5.5-3.5-6"/>',
+map:'<path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3zM9 4v13M15 7v13"/>',
+coin:'<circle cx="12" cy="12" r="9"/><path d="M14.8 9a2 2 0 0 0-1.8-1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1-1.8-1M12 6.5v11"/>',
+chest:'<path d="M3 11h18v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM3 11V9a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2M10 11v3h4v-3"/>',
+boat:'<path d="M2 20c1.3 1.3 2.7 1.3 4 0s2.7-1.3 4 0 2.7 1.3 4 0 2.7-1.3 4 0 2.7 1.3 4 0M4 17l-1-4h18l-2 4M6 13V5l7 8M12 9h4"/>',
+left:'<path d="M5 12h14M5 12l6 6M5 12l6-6"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>',
+play:'<path d="M7 4v16l13-8z"/>',pause:'<path d="M7 5h3v14H7zM14 5h3v14h-3z"/>',refresh:'<path d="M20 11A8 8 0 0 0 4.5 9M4 5v4h4M4 13a8 8 0 0 0 15.5 2M20 19v-4h-4"/>',
+check:'<path d="M5 12l5 5L20 7"/>',trophy:'<path d="M8 21h8M12 17v4M7 4h10v7a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/>',
+target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+phone:'<path d="M3 3l18 18M8 3h8a1 1 0 0 1 1 1v9M17 17v3a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V7"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'};
+const ic=(n,s='')=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${s}>${P[n]}</svg>`;
+const $=s=>document.querySelector(s);
+const KEY='diario-bordo-v2',BASE='Códice da Ordem',START='2026-11-27',END='2026-12-17';
+const MAP0={'1ª ordem: separáveis':2,'1ª ordem: lineares (fator integrante)':2,'Laplace: propriedades':2,'Laplace: resolver PVI':2,'1ª ordem: exatas':1,'1ª ordem: homogêneas':1,'2ª ordem: coeficientes indeterminados':1,'2ª ordem: variação de parâmetros':1,'Método de Euler e PVI':1,'Autovalores e autovetores':1,'Sistemas homogêneos':1,'Sistemas não homogêneos':1,'Centroide de figuras compostas':1,'Inércia de áreas e eixos paralelos':1,'Produto de inércia e eixos inclinados':1,'Círculo de Mohr e momentos principais':1,'Inércia de massa':1,'Trabalho virtual':1,'DCL e equilíbrio de corpo rígido':1};
+const DEF=()=>({done:{},notas:{e1:'2',e2:'5,5',s1:'4'},map:Object.assign({},MAP0)});
+let S=DEF();
+try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.done)S=Object.assign(S,r,{notas:Object.assign(DEF().notas,r.notas||{}),map:Object.assign({},MAP0,r.map||{})})}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const RANKS=['Recruta','Aprendiz','Iniciado','Sombra','Corredor dos telhados','Vigia da torre','Mestre','Mestre da Ordem','Lenda da Ordem'];
+const DOW=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],WD=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const MO=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'],MOL=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const EX={'2026-12-07':{short:'P3 EDO + Apres. GA',tiny:'P3+GA',full:'P3 de EDO e apresentação de Gestão Ambiental'},'2026-12-14':{short:'Rec. EDO',tiny:'Rec',full:'Recuperação de EDO'},
+'2026-12-16':{short:'P4 Estática',tiny:'P4',full:'P4 de Estática'},'2026-12-17':{short:'P3 + Rec. Estática',tiny:'2 provas',full:'refação da P3 e recuperação de Estática'}};
+const RAW={
+'2026-11-27':[['org','geral','','Confira também se o caderno das duas matérias está completo.'],['edo','edo','autovalores e autovetores','Lista 7: Seção 7.2 (matrizes e determinante) e Seção 7.3, problemas 1 a 5 e 14 a 16. As respostas estão no fim de cada seção.'],['edo','edo','autovalores e autovetores','Lista 7: Seção 7.3, problemas 17 a 20, e Seção 7.4, problemas 1 e 2.'],['eq','est','DCL e equilíbrio de corpo rígido (2D e 3D)','Base da recuperação (matéria da P2) e de quase toda a Estática.'],['cg','est','centroide e centro de gravidade de figuras compostas','Cai na refação da P3 e é a base da P4.'],['ine','est','inércia de áreas compostas','Pratica a aula de ontem (P4).']],
+'2026-11-30':[['edo','edo','sistemas homogêneos (autovalores reais)','Lista 7: Seção 7.4, problemas 3 a 6, e Seção 7.5, problemas 7 a 9.'],['edo','edo','sistemas com autovalores complexos e repetidos','A Lista 7 não cobre este tema: use os exemplos dos slides e os exercícios das Seções 7.6 e 7.8 do livro.'],['edo','edo','2ª ordem: coeficientes indeterminados','Prepara a aula de hoje e já revisa matéria da P1 para a recuperação. Livro: Seção 3.5.']],
+'2026-12-01':[['edo','edo','sistemas: coeficientes indeterminados','Pratica a aula de ontem. Exercícios dos slides ou da Seção 7.9 do livro.'],['edo','edo','2ª ordem: variação de parâmetros','Prepara a aula de hoje e revisa matéria da P1. Livro: Seção 3.6.'],['ine','est','momento de inércia por integração e eixos paralelos','Cai na refação da P3 e na P4.']],
+'2026-12-02':[['edo','edo','sistemas: variação de parâmetros','Pratica a aula de ontem.'],['atr','est','atrito seco','Refação da P3.'],['atr','est','atrito: calços, parafusos e correias','Refação da P3.'],['mohr','est','produto de inércia e eixos inclinados','Noite: pratica a aula desta tarde (P4).'],['lista','est','1','Noite. Priorize os exercícios dos temas que caem nas provas de dezembro.']],
+'2026-12-03':[['edo','edo','sistemas misturados','Misture os tipos: o difícil é reconhecer qual método usar.'],['trel','est','treliças: método dos nós','Recuperação (matéria da P2).'],['lista','est','1','Termine, digitalize e envie no Classroom.']],
+'2026-12-04':[['mohr','est','círculo de Mohr e momentos principais','Pratica a aula de ontem (P4). Se o círculo travar, resolva pelas fórmulas e confira um pelo outro.'],['sim','edo','P3','Monte com exercícios da Lista 7 e dos slides que você ainda não fez.'],['corr','edo','','Já refaça na hora os erros mais importantes.'],['cg','est','centro de gravidade de corpos e Pappus-Guldinus','Refação da P3.'],['flu','est','carga distribuída e pressão de fluidos','Refação da P3.']],
+'2026-12-05':[['ga','ga','pesquisa e estrutura do trabalho','Depois do compromisso da manhã, no seu ritmo.'],['ga','ga','escrever o conteúdo']],
+'2026-12-06':[['ga','ga','finalizar o trabalho'],['ga','ga','montar os slides'],['ga','ga','ensaiar a apresentação','Ensaie em voz alta, cronometrando o tempo.']],
+'2026-12-07':[['prova','edo','P3 de EDO','Cai: autovalores e autovetores, sistemas homogêneos e não homogêneos.'],['apres','ga','Apresentação de Gestão Ambiental']],
+'2026-12-08':[['edo','edo','1ª ordem: equações exatas','Recuperação. Livro: Seção 2.6.'],['edo','edo','1ª ordem: equações homogêneas','Recuperação. Livro: exercícios de equações homogêneas no fim da Seção 2.2.'],['edo','edo','1ª ordem: lineares e separáveis','Revisão rápida do que você já sabe mais ou menos. Livro: Seções 2.1 e 2.2.']],
+'2026-12-09':[['edo','edo','2ª ordem: homogênea e coeficientes indeterminados','Recuperação. Livro: Seções 3.1 e 3.5.'],['edo','edo','2ª ordem: variação de parâmetros','Recuperação. Livro: Seção 3.6.'],['trel','est','treliças: método das seções','Recuperação (matéria da P2).'],['massa','est','momento de inércia de massa','Noite: pratica a aula desta tarde (P4).'],['maq','est','estruturas e máquinas','Noite. Recuperação (matéria da P2).']],
+'2026-12-10':[['edo','edo','método de Euler e PVI','Recuperação. Livro: Seções 2.4 e 2.7.'],['edo','edo','Laplace: transformada, tabela e inversa','Recuperação. Livro: Seções 6.1 e 6.2.'],['edo','edo','Laplace: resolver PVI','Recuperação. Livro: Seção 6.2.']],
+'2026-12-11':[['tv','est','trabalho virtual','Pratica a aula de ontem (P4).'],['sim','edo','semestre','Misture todos os temas: 1ª ordem, 2ª ordem, Euler, Laplace e sistemas.'],['corr','edo','','Já refaça na hora os erros mais importantes.'],['tv','est','trabalho virtual'],['lista','est','2','Priorize os exercícios de inércia e trabalho virtual.']],
+'2026-12-13':[['fi','est','forças internas, diagramas e relações entre carga, cortante e momento','Cai na recuperação (P2) e na refação da P3. Você já sabe mais ou menos: foque nos diagramas.'],['eq','est','DCL e equilíbrio de corpo rígido: apoios e 3D','Reforço da base da recuperação (P2), do atrito e do trabalho virtual.'],['maq','est','estruturas e máquinas','Recuperação (matéria da P2).'],['lista','est','2','Termine, digitalize e envie no Classroom (prazo: 16/12).'],['rev','edo','véspera da recuperação','Só fichas de memória e caderno de erros de EDO. Nada de conteúdo novo.']],
+'2026-12-14':[['prova','edo','Recuperação de EDO','Cai o semestre todo: 1ª ordem, 2ª ordem, Euler, Laplace e sistemas.']],
+'2026-12-15':[['sim','est','P4','Monte com exercícios das listas de inércia e trabalho virtual que você ainda não fez.'],['erros','est','','P4.']],
+'2026-12-16':[['prova','est','P4 de Estática','Cai: inércia de áreas, produto de inércia, Mohr, inércia de massa e trabalho virtual.'],['rev','est','refação da P3','Noite, depois da prova: fichas e 2 exercícios de atrito e centro de gravidade.'],['rev','est','recuperação (P2)','Noite: fichas e 2 exercícios de treliças e forças internas.']],
+'2026-12-17':[['prova','est','Refação da P3 de Estática','Cai: atrito, forças internas, centro de gravidade e centroide, Pappus-Guldinus e fluidos.'],['prova','est','Recuperação de Estática (matéria da P2)','Cai: equilíbrio de corpo rígido, treliças, estruturas e máquinas, forças internas e diagramas.']]};
+const TEO='10 min: releia a teoria no slide ou no caderno e veja um exemplo resolvido.',FICHA='Por último: anote a fórmula ou o método principal na sua ficha de memória.';
+const W=a=>[TEO,...a,FICHA];
+const K={
+org:{pts:10,min:50,kick:'Preparar o esconderijo',steps:['Junte os slides e as anotações do caderno das duas matérias. Faltou alguma aula? Peça foto a um colega.','Baixe as 2 listas de Estática do Classroom e a Lista 7 de EDO.','Confira no Mapa dos temas (botão no topo) o que você marcou e ajuste se quiser.','Separe um caderno de erros e um bloco de cartões para as fichas de memória.']},
+edo:{pts:10,min:50,kick:'Bloco padrão de EDO',segs:[{m:10,l:'Teoria e exemplo',st:0},{m:35,l:'Exercícios sem olhar',st:1},{m:5,l:'Erros e ficha',st:3}],steps:['10 min: releia a teoria e veja um exemplo resolvido (slides, caderno ou livro).','35 min: resolva exercícios sem olhar a resolução.','Travou por 10 min? Olhe só o próximo passo, não a resolução inteira.','5 min: anote os erros no caderno de erros e o método na ficha de memória.','Atualize a tabela “tipo de equação → método”.']},
+eq:{pts:10,min:50,kick:'Bloco de equilíbrio',steps:W(['Desenhe o DCL: isole o corpo e coloque todas as forças, reações de apoio e momentos.','Escolha os eixos e o ponto do momento (onde há mais incógnitas).','Escreva ΣFx = 0, ΣFy = 0 e ΣM = 0 (no 3D também ΣFz e os momentos nos 3 eixos).','Resolva, confira sinais e unidades e anote os erros.'])},
+trel:{pts:10,min:50,kick:'Bloco de treliças',steps:W(['Ache as reações de apoio com a treliça inteira (DCL).','Método dos nós: comece por um nó com no máximo 2 incógnitas e use ΣFx = ΣFy = 0.','Método das seções: corte no máximo 3 barras e use ΣM num ponto onde duas delas se cruzam.','Indique tração (T) ou compressão (C) em cada barra, confira e anote os erros.'])},
+maq:{pts:10,min:50,kick:'Bloco de estruturas e máquinas',steps:W(['Identifique os membros de duas forças: a força fica na direção da barra.','Desmonte a estrutura: DCL de cada peça; nos pinos, as forças são iguais e opostas.','Escreva o equilíbrio de cada peça, começando pela que tem menos incógnitas.','Confira e anote os erros.'])},
+fi:{pts:10,min:50,kick:'Bloco de forças internas',steps:W(['Ache as reações de apoio da viga.','Corte a viga em cada trecho e escreva V(x) e M(x) pelo equilíbrio do pedaço.','Desenhe os diagramas: dV/dx = −w e dM/dx = V.','Confira: o momento é máximo onde V = 0. Anote os erros.'])},
+atr:{pts:10,min:50,kick:'Bloco de atrito',steps:W(['DCL com a força de atrito no sentido que impede o movimento.','Na iminência de deslizar: F = μs·N. Verifique também se tomba antes de deslizar.','Correias: T2 = T1·e^(μβ), com β em radianos. Calços e parafusos: siga o exemplo do caderno.','Resolva o equilíbrio e anote os erros.'])},
+cg:{pts:10,min:50,kick:'Bloco de centro de gravidade',steps:W(['Divida o corpo em partes simples e monte uma tabela: área (ou massa), x̃, ỹ, x̃·A, ỹ·A.','Centroide: x̄ = Σ(x̃·A)/ΣA e ȳ = Σ(ỹ·A)/ΣA. Furos entram com área negativa.','Pappus-Guldinus: área = θ·r̄·L e volume = θ·r̄·A (θ = 2π numa volta inteira).','Confira e anote os erros.'])},
+flu:{pts:10,min:50,kick:'Bloco de cargas distribuídas',steps:W(['Carga distribuída: a resultante é a área sob o gráfico e atua no centroide dessa área.','Fluido: a pressão cresce com a profundidade, p = ρ·g·h; a carga na placa vira triângulo ou trapézio.','Ache a resultante e onde ela atua; depois faça o equilíbrio da peça.','Anote os erros.'])},
+ine:{pts:10,min:50,kick:'Bloco de momento de inércia',steps:W(['Divida a figura em partes conhecidas: retângulo, triângulo, círculo. Furos entram com sinal negativo.','Ache a área e o centroide de cada parte e o centroide da figura toda.','Pegue o I de cada parte em relação ao próprio centroide (tabela do livro ou dos slides).','Leve cada parte para o eixo pedido com eixos paralelos: I = Ī + A·d².','Some as partes, confira as unidades (mm⁴, m⁴) e anote os erros.'])},
+mohr:{pts:10,min:50,kick:'Bloco de inércia: eixos girados',steps:W(['Calcule Ix, Iy e Ixy da figura (Ixy também usa eixos paralelos: Ixy = Īxy + A·dx·dy).','Monte o círculo: centro em (Ix+Iy)/2 e raio √[((Ix−Iy)/2)² + Ixy²].','Momentos principais: centro ± raio; ângulo por tan 2θp = −2Ixy/(Ix−Iy).','Eixo inclinado: gire 2θ no círculo ou use as fórmulas de transformação, e confira um pelo outro.','Anote os erros, principalmente de sinal.'])},
+massa:{pts:10,min:50,kick:'Bloco de inércia de massa',steps:W(['Divida o corpo em partes de massa conhecida (barra, disco, placa…).','Pegue o I de cada parte em relação ao próprio centro de massa pela tabela.','Leve para o eixo pedido: I = Ī + m·d².','Some, confira as unidades (kg·m²) e, se pedir, calcule o raio de giração k = √(I/m).','Anote os erros.'])},
+tv:{pts:10,min:50,kick:'Bloco de trabalho virtual',steps:W(['Desenhe o mecanismo e escolha uma coordenada só (geralmente o ângulo θ).','Escreva a posição de cada ponto onde atua força, em função de θ, a partir de um ponto fixo.','Derive para obter os deslocamentos virtuais (δx, δy) em função de δθ.','Escreva δU = Σ F·δs + Σ M·δθ = 0 e isole o que se pede.','Confira os sinais e anote os erros.'])},
+lista:{pts:10,min:50,kick:'Lista que vale nota',steps:['Abra a lista no Classroom e escolha os exercícios deste bloco.','Escreva a resolução organizada, como se fosse a prova.','Marque o que travou e passe para o caderno de erros.','No último bloco da lista: digitalize e envie no Classroom (prazo: 16/12).']},
+rev:{pts:10,min:50,kick:'Revisão leve',steps:['Releia as fichas de memória do tema.','Refaça 2 ou 3 erros do caderno de erros, sem olhar a resolução.','Nada de conteúdo novo. Separe o material e durma cedo.']},
+sim:{pts:25,min:100,kick:'Ensaio da prova',steps:['Monte a prova com exercícios que você ainda não fez, de todos os temas que caem.','Celular fora do quarto e tempo real de prova.','Sem consulta. Treinar assim é o melhor remédio para o nervosismo.']},
+corr:{pts:10,min:50,kick:'Depois do treino',steps:['Corrija o simulado.','Marque cada questão: certa, errada ou travou.','Passe os erros para o caderno de erros.']},
+erros:{pts:10,min:50,kick:'Caça aos erros',steps:['Refaça do zero, sem olhar a resolução.','Errou de novo? Marque para revisar na véspera.']},
+ga:{pts:10,min:50,kick:'Trabalho de Gestão Ambiental',steps:['Releia o que o professor pediu e como o trabalho será avaliado.','Faça só a parte deste bloco: uma etapa de cada vez.','Salve o arquivo em dois lugares (computador e nuvem).','Anote o que falta para o próximo bloco.']},
+apres:{pts:50,min:0,kick:'Dia de apresentação',steps:['Revise os slides uma vez, sem mudanças grandes.','Leve o arquivo em dois lugares (pendrive e nuvem ou e-mail).','Chegue um pouco antes para testar o computador da sala.','1 min de respiração lenta antes de começar: inspire em 4 tempos, solte em 6.','Fale devagar: você ensaiou.']},
+prova:{pts:50,min:0,kick:'Dia de prova',steps:['Na véspera: revise as fichas de memória e o caderno de erros e durma bem.','No dia: nada de conteúdo novo.','10 min antes da prova: escreva num papel o que está te preocupando e deixe de lado.','1 min de respiração lenta: inspire em 4 tempos, solte em 6.','Se puder usar rascunho, anote logo no começo as fórmulas que você decorou.','Leia a prova toda e comece pelas questões que você sabe. Travou? Pule e volte depois.','Escreva tudo o que souber: desenho, fórmula e raciocínio contam nota mesmo sem a conta final.']}};
+const SLOTS={1:['10h','11h','12h'],2:['8h','9h','10h'],3:['8h','9h','10h','19h','20h'],4:['8h','9h','10h'],5:['8h','10h','11h','13h','14h','15h'],6:['14h','15h'],0:['9h','10h','11h','14h','15h']};
+const ANTI=['Celular em outro cômodo.','Regra dos 5 minutos: comece só por 5 minutos; parar depois é permitido.','Na noite anterior, decida qual é o primeiro exercício.','Comece pelo mais fácil.','A meta do dia é cumprir os blocos, não “entender tudo”.','Não existe game over: perdeu um dia, segue no próximo.','Travou de verdade num tema? Uma dúvida mandada ao professor ou a um colega economiza blocos.'];
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const shift=(k,n)=>{const d=parse(k);d.setDate(d.getDate()+n);return key(d)};
+const TODAY=key(new Date());
+const inRange=k=>k>=START&&k<=END;
+const subjIc=s=>s==='edo'?'feather':s==='est'?'tower':s==='ga'?'leaf':'map';
+function label(kind,subj,x,k){
+ const S2=subj==='edo'?'EDO':'Estática';
+ if(kind==='prova')return x||EX[k].full;
+ if(kind==='apres')return x;if(kind==='ga')return 'Gestão Ambiental: '+x;
+ if(kind==='org')return 'Organizar material';if(kind==='lista')return 'Lista de Estática '+x;if(kind==='rev')return 'Revisão leve: '+x;
+ if(kind==='sim')return 'Simulado '+S2+(x?' ('+x+')':'');
+ if(kind==='corr')return 'Corrigir simulado';if(kind==='erros')return 'Refazer erros';
+ return S2+': '+x}
+function tasksOf(k){
+ const sl=(k==='2026-12-16'?['19h','20h']:SLOTS[parse(k).getDay()]||[]).slice();
+ return (RAW[k]||[]).map((t,i)=>{const[kind,subj,x,tip]=t;let time='';
+  if(kind!=='prova'&&kind!=='apres'){time=sl.shift()||'';if(kind==='sim'){sl.shift();time=time?time+' (100 min)':''}}
+  return {id:k+'#'+i,k,kind,subj,x,tip,time,pts:K[kind].pts,min:K[kind].min,name:label(kind,subj,x,k),
+   icon:kind==='prova'||kind==='apres'?'flag':kind==='sim'?'target':kind==='lista'?'check':kind==='rev'?'refresh':subjIc(subj)}})}
+function days(){const a=[];for(let k=START;k<=END;k=shift(k,1))a.push(k);return a}
+const dayDone=k=>{const t=tasksOf(k);return t.length>0&&t.every(x=>S.done[x.id])};
+const allDone=(a,f)=>{const l=a.filter(f);return l.length>0&&l.every(x=>S.done[x.id])};
+const ACH=[
+{n:'Primeiro passo',d:'Cumpra todas as tarefas do primeiro dia (27/11).',t:a=>allDone(a,x=>x.k===START)},
+{n:'Mestre da inércia',d:'Conclua todos os blocos de momento de inércia.',t:a=>allDone(a,x=>['ine','mohr','massa'].includes(x.kind))},
+{n:'Ensaio geral',d:'Faça todos os simulados.',t:a=>allDone(a,x=>x.kind==='sim')},
+{n:'Caçador de erros',d:'Conclua todos os blocos de corrigir e refazer erros.',t:a=>allDone(a,x=>x.kind==='corr'||x.kind==='erros')},
+{n:'Sexta lendária',d:'Cumpra todos os blocos de todas as sextas.',t:a=>allDone(a,x=>parse(x.k).getDay()===5)},
+{n:'Listas entregues',d:'Termine e envie as duas listas de Estática.',t:a=>allDone(a,x=>x.kind==='lista')},
+{n:'Missão cumprida',d:'Faça todas as provas e a apresentação.',t:a=>allDone(a,x=>x.kind==='prova'||x.kind==='apres')}];
+function stats(){let total=0,pts=0;const all=[];
+ days().forEach(k=>tasksOf(k).forEach(t=>{total+=t.pts;all.push(t);if(S.done[t.id])pts+=t.pts}));
+ const lvl=Math.floor(pts/50)+1,ach=ACH.map(a=>!!a.t(all));
+ let streak=0;for(let k=TODAY>END?END:TODAY;k>=START;k=shift(k,-1)){const t=tasksOf(k);if(!t.length)continue;
+  if(t.every(x=>S.done[x.id]))streak++;else if(k===TODAY)continue;else break}
+ return {total,pts,lvl,rank:RANKS[Math.min(lvl-1,8)],ach,streak}}
+function header(st){
+ $('#rankIc').innerHTML=ic('seal','style="width:30px;height:30px;color:#9e1b1f"');$('#rank').textContent=st.rank;
+ $('#pts').textContent=st.pts;$('#ptsTot').textContent='de '+st.total;$('#lvl').textContent=st.lvl;
+ $('#lvlBar').style.width=(st.pts%50)*2+'%';$('#lvlNext').textContent='faltam '+(50-st.pts%50)+' para o nível '+(st.lvl+1);
+ $('#achN').textContent=st.ach.filter(Boolean).length+'/'+ACH.length;
+ const f=Math.floor(st.pts/st.total*10);
+ $('#route').innerHTML='<span>Caminho pelos telhados</span>'+Array.from({length:10},(_,i)=>`<i class="${i<f?'on':''}"></i>`).join('')+ic('tower','class="ic chest"');
+ $('#route').setAttribute('aria-label',`Caminho pelos telhados: ${f} de 10 trechos`);
+ $('#streak').textContent=st.streak?`Sequência: ${st.streak} ${st.streak>1?'dias de estudo completos seguidos':'dia de estudo completo'}. Refúgio não quebra a sequência.`:'Complete todos os blocos de um dia para começar uma sequência.'}
+function fmtShort(k){const d=parse(k);return DOW[d.getDay()].slice(0,3).toLowerCase()+', '+pad(d.getDate())+'/'+pad(d.getMonth()+1)}
+function renderCal(st){
+ const t=tasksOf(TODAY),go=`<button class="btn" data-go="${TODAY<START?START:TODAY}" type="button">${ic('map')}`;
+ let m;
+ if(TODAY<START){const n=tasksOf(START);m=`<div><b>A jornada começa ${shift(TODAY,1)===START?'amanhã':'em '+fmtShort(START)}.</b><br>Primeiro dia: ${[...new Set(n.map(x=>x.name))].join(' + ')}. Hoje à noite, escolha o primeiro exercício.</div>${go}Ver o primeiro dia</button>`}
+ else if(TODAY>END)m=`<div><b>Jornada concluída!</b><br>Hora do prêmio grande.</div>`;
+ else if(EX[TODAY])m=`<div><b>Hoje é dia da ${EX[TODAY].full}.</b><br>Você treinou para isso. Revise o caderno de erros e comece pelo que sabe.</div>${go}Abrir o dia</button>`;
+ else if(!t.length)m=`<div><b>Hoje é dia de refúgio.</b><br>Descanso faz parte do treino.</div>`;
+ else{const d=t.filter(x=>S.done[x.id]).length;m=`<div><b>Hoje: ${d} de ${t.length} tarefas feitas.</b><br>${d===t.length?'Dia completo. Pode jogar!':'Próxima: '+t.find(x=>!S.done[x.id]).name}</div>${go}Abrir o dia de hoje</button>`}
+ $('#mission').innerHTML=m;
+ let h=WD.map(w=>`<div class="wd">${w}</div>`).join('');
+ for(let k='2026-11-23';k<='2026-12-20';k=shift(k,1)){
+  const d=parse(k),dw=d.getDay(),ir=inRange(k),ts=tasksOf(k),ex=EX[k],gold=ir&&!ex&&dayDone(k);
+  const porto=ir&&(dw===0||dw===6)&&!ts.length;
+  let cls='cell brick'+(ir?'':' out')+(porto?' porto':'')+(ex?' boss':'')+(gold?' gold':'')+(k===TODAY?' today':'');
+  let body='';
+  if(ex)body=`${ic('flag')}<span class="cname">${EX[k].short}</span><span class="ctiny">${EX[k].tiny}</span>${dayDone(k)?'<span class="cname">Feita!</span>':''}`;
+  else if(porto)body=`${ic('moon')}<span class="cname">Refúgio</span>`;
+  else if(ts.length)body=`<div class="pips">${ts.map(x=>`<i class="pip ${x.subj} ${S.done[x.id]?'on':''}"></i>`).join('')}</div>`;
+  const hd=`<div class="hd"><span class="dn">${d.getDate()}</span>${gold?ic('seal','class="ic pop"'):`<span class="mo">${d.getDate()===1||k==='2026-11-23'?MO[d.getMonth()]:''}</span>`}</div>`;
+  const lab=`${DOW[dw]}, ${d.getDate()} de ${MOL[d.getMonth()]}`+(ex?', '+EX[k].full:porto?', refúgio':ts.length?`, ${ts.filter(x=>S.done[x.id]).length} de ${ts.length} feitas`:'');
+  h+=ir?`<button type="button" class="${cls}" data-go="${k}" aria-label="${lab}">${hd}${body}</button>`:`<div class="${cls}" aria-hidden="true">${hd}</div>`}
+ $('#grid').innerHTML=h;
+ $('#achs').innerHTML=ACH.map((a,i)=>`<div class="ach brick ${st.ach[i]?'ok':'lock'}">${ic(st.ach[i]?'trophy':'lock')}<div><b>${a.n}</b><small>${a.d}</small></div></div>`).join('');
+ drawNotas();drawMapa()}
+const sel={};
+const segsOf=t=>K[t.kind].segs||[{m:t.min,l:'Foco'}];
+const TMS={};let T=null,ACT=S.act||null,tickN=0;
+function getT(t){if(!TMS[t.id]){const sg=segsOf(t);TMS[t.id]={task:t.id,min:t.min,phase:'idle',left:sg[0].m*60,end:0,run:false,label:t.name,segs:sg,si:0}}return TMS[t.id]}
+const remain=X=>X.run?Math.max(0,Math.ceil((X.end-Date.now())/1000)):X.left;
+function saveT(){S.tm={};for(const id in TMS){const X=TMS[id];if(X.phase!=='idle')S.tm[id]={phase:X.phase,si:X.si,left:remain(X)}}S.act=ACT;save()}
+for(const id in (S.tm||{})){const[k,i]=id.split('#');const t=tasksOf(k)[+i];if(t&&t.kind!=='prova'&&t.kind!=='apres')Object.assign(getT(t),S.tm[id],{run:false})}
+function tog(X){if(!X)return;unlock();
+ if(X.run){X.left=remain(X);X.run=false}
+ else{for(const id in TMS){const o=TMS[id];if(o!==X&&o.run){o.left=remain(o);o.run=false;toast(`Pausei “${o.label}” para começar este bloco.`)}}
+  if(X.phase==='idle'){X.phase='foco';X.si=0;X.left=X.segs[0].m*60}X.end=Date.now()+X.left*1000;X.run=true;ACT=X.task}
+ saveT();drawT()}
+const mmss=s=>Math.floor(s/60)+':'+pad(s%60);
+function renderDay(k){
+ const d=parse(k),dw=d.getDay(),ts=tasksOf(k),ex=EX[k],pv=shift(k,-1),nx=shift(k,1);
+ const done=ts.filter(x=>S.done[x.id]),pos=ts.reduce((s,x)=>s+x.pts,0);
+ let h=`<div class="dnav"><button class="btn ghost" data-go="" type="button">${ic('left')}Calendário</button><span class="sp"></span>
+ <button class="btn ghost" data-go="${pv}" ${inRange(pv)?'':'disabled'} type="button" aria-label="Dia anterior">${ic('prev')}</button>
+ <button class="btn ghost" data-go="${nx}" ${inRange(nx)?'':'disabled'} type="button" aria-label="Próximo dia">${ic('next')}</button></div>
+ <div class="dtitle"><h2>${DOW[dw]}, ${d.getDate()} de ${MOL[d.getMonth()]}</h2>${k===TODAY?'<b style="color:var(--sea)">Hoje</b>':''}</div>`;
+ if(!ts.length){
+  const msg=dw===6?'Dia de refúgio. Compromisso pesado de manhã: recarregue a energia.':dw===0?'Dia de refúgio. Folga total.':'Dia livre.';
+  $('#day').innerHTML=h+`<div class="rest brick"><h3 style="font-size:28px;display:flex;gap:10px;align-items:center">${ic('moon','style="width:32px;height:32px"')}Refúgio</h3><p style="margin:10px 0 0">${msg} Descanso não quebra a sequência.</p></div>`;return}
+ h+=`<p class="dsub">${done.length} de ${ts.length} ${ts.length>1?'tarefas':'tarefa'} · ${done.reduce((s,x)=>s+x.pts,0)} de ${pos} pontos${ts.length&&done.length===ts.length?' · dia completo!':''}</p>`;
+ let si=sel[k];if(si==null||!ts[si]){si=ts.findIndex(x=>!S.done[x.id]);if(si<0)si=0}sel[k]=si;const t=ts[si];
+ const ord=['Primeiro','Segundo','Terceiro','Quarto','Quinto'];
+ h+=`<div class="dgrid"><div class="tlist">${ts.map((x,i)=>`<div class="task brick ${x.subj==='geral'?'geral':x.kind==='prova'||x.kind==='apres'?'boss':x.subj} ${i===si?'sel':''} ${S.done[x.id]?'done':''}"><button type="button" class="tsel" data-sel="${i}" aria-pressed="${i===si}">
+  <span class="tic">${ic(x.icon)}</span><span><small>${x.kind==='prova'?'Dia de prova':x.kind==='apres'?'Apresentação':(x.time?x.time+' · ':'')+(x.kind==='sim'?'simulado':'bloco')}</small><b>${x.name}</b><small>+${x.pts} pontos</small></span></button><button type="button" class="tst" data-tick="${x.id}" aria-label="${S.done[x.id]?'Desmarcar':'Marcar como feita'}: ${x.name}">${S.done[x.id]?ic('check','style="width:18px;height:18px"'):''}</button></div>`).join('')}</div>`;
+ const isP=t.kind==='prova'||t.kind==='apres',c=isP?'boss':t.subj==='geral'?'geral':t.subj;
+ if(!isP)T=getT(t);
+ h+=`<article class="scrollc brick ${c}"><div class="kick">${ic(isP?'flag':'map')}${K[t.kind].kick}${isP?'':' · '+t.min+' min'}${t.time?' · '+t.time.replace(' (100 min)',''):''}</div>
+ <h3>${t.name}</h3>${t.tip?`<p class="focus">${t.tip}</p>`:''}
+ <ol class="steps">${K[t.kind].steps.map((s,i)=>`<li data-st="${i}">${s}</li>`).join('')}</ol>
+ ${isP?'':`<div class="timer"><span id="tm">${mmss(T.left)}</span><div class="tinfo"><b id="tph"></b><small id="tsub"></small></div>
+ <div class="segs" id="tsegs"></div><div class="tbtns"><button class="btn" id="tgo" type="button" style="--b:var(--boss)"></button><button class="btn ghost" id="treset" type="button" aria-label="Reiniciar timer">${ic('refresh')}</button><button class="btn ghost" id="tskip" type="button" ${K[t.kind].segs?'':'hidden'}>${ic('next')}Pular etapa</button></div></div>
+ <p class="phone">${ic('phone')}Celular em outro cômodo antes de partir.</p>`}
+ <button class="btn big ${S.done[t.id]?'ghost':''}" id="done" data-id="${t.id}" type="button" style="--b:var(--est)">${S.done[t.id]?ic('refresh')+'Desfazer conclusão':ic('check')+(isP?(t.kind==='apres'?'Fiz a apresentação':'Fiz a prova'):t.kind==='sim'?'Concluir simulado':'Concluir bloco')+` (+${t.pts} pontos)`}</button>
+ </article></div>
+ <details class="anti brick"><summary>Regras da Ordem contra a procrastinação</summary><ul>${ANTI.map(a=>`<li>${a}</li>`).join('')}</ul></details>`;
+ $('#day').innerHTML=h;drawT()}
+function drawT(){
+ const A=TMS[ACT]&&TMS[ACT].phase!=='idle'?TMS[ACT]:null;
+ document.title=A?`${mmss(A.left)} ${A.phase==='foco'?'Foco':'Pausa'} · ${BASE}`:BASE;
+ const mi=$('#mini');if(mi){mi.hidden=!A||!!view();if(A){const mul=A.segs.length>1;
+  $('#mtm').textContent=mmss(A.left);
+  $('#mph').textContent=A.phase==='pausa'?(A.run?'Pausa de 10 min':'Pausa parada'):(A.run?'Em foco':'Pausado')+(mul?` · etapa ${A.si+1} de ${A.segs.length}: ${A.segs[A.si].l}`:'');
+  $('#mname').textContent=A.label;
+  $('#mgo').innerHTML=A.run?ic('pause')+'Pausar':ic('play')+'Continuar';
+  $('#mback').dataset.go=String(A.task).split('#')[0]}}
+ const tm=$('#tm');if(!tm||!T)return;tm.textContent=mmss(T.left);
+ const sg=T.segs[T.si],multi=T.segs.length>1;
+ $('#tph').textContent=T.phase==='idle'?(multi?`Pronto: começa com ${T.segs[0].m} min de ${T.segs[0].l.toLowerCase()}`:`Pronto para ${T.min} min de foco`):T.phase==='foco'?(T.run?'':'Pausado · ')+(multi?`Etapa ${T.si+1} de ${T.segs.length}: ${sg.l}`:'Foco: '+T.label):(T.run?'Pausa de 10 min':'Pausa parada');
+ $('#tsegs').innerHTML=multi?T.segs.map((x,i)=>`<span class="seg ${T.phase==='foco'&&i===T.si?'on':''} ${T.phase==='pausa'||(T.phase==='foco'&&i<T.si)?'ok':''}" style="flex:${x.m}">${x.l} · ${x.m}</span>`).join(''):'';
+ const ts=$('#tskip');if(ts)ts.disabled=T.phase!=='foco';
+ document.querySelectorAll('.steps li').forEach(li=>li.classList.toggle('now',multi&&T.phase==='foco'&&+li.dataset.st===sg.st));
+ $('#tsub').textContent=T.phase==='idle'?(multi?'Cada etapa toca um som e passa sozinha para a próxima; no fim, 10 min de pausa.':'Depois vêm 10 min de pausa, com som ao terminar.'):T.phase==='foco'?(T.si<T.segs.length-1?`Depois: ${T.segs[T.si+1].l.toLowerCase()} (${T.segs[T.si+1].m} min).`:'Ao terminar, toca o som e começa a pausa.'):'Levante, beba água, longe do celular.';
+ $('#tgo').innerHTML=T.run?ic('pause')+'Pausar':ic('play')+(T.phase==='idle'?'Partir':'Continuar')}
+let ac;
+function unlock(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
+function beep(){try{if(!ac)return;const n=ac.currentTime;[660,880,1046].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain(),t=n+i*.32;
+ o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.35,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.3);
+ o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.32)})}catch(e){}}
+setInterval(()=>{let ch=false;for(const id in TMS){const X=TMS[id];if(!X.run)continue;ch=true;X.left=remain(X);
+ if(X.left<=0){beep();if(X.phase==='foco'&&X.si<X.segs.length-1)nextSeg(X);else if(X.phase==='foco'){X.phase='pausa';X.left=600;X.end=Date.now()+600000;toast(`${X.label}: foco cumprido! Pausa de 10 min. Depois conclua o bloco.`)}
+  else{X.phase='idle';X.run=false;X.si=0;X.left=X.segs[0].m*60;toast('Pausa encerrada. Hora do próximo bloco!')}saveT()}}
+ if(!ch)return;if(++tickN%10===0)saveT();
+ drawT()},500);
+function nextSeg(X){X.si++;const x=X.segs[X.si];X.left=x.m*60;X.end=Date.now()+X.left*1000;toast(`Próxima etapa: ${x.l} (${x.m} min).`)}
+const num=v=>{if(v==null||String(v).trim()==='')return null;const x=parseFloat(String(v).replace(',','.'));return isNaN(x)?null:Math.min(10,Math.max(0,x))};
+const f1=x=>(Math.ceil(x*10-1e-9)/10).toFixed(1).replace('.',',');
+function drawNotas(){const n=S.notas;
+ document.querySelectorAll('[data-n]').forEach(i=>{if(document.activeElement!==i)i.value=n[i.dataset.n]??''});
+ const[e1,e2,e3]=['e1','e2','e3'].map(k=>num(n[k]));let a;
+ if(e1==null||e2==null)a='Preencha P1 e P2.';
+ else{const mp=(e1+e2+(e3??0))/3;
+  if(mp>=6)a=`Média ${f1(mp)}: aprovado sem recuperação.`;
+  else{const r=(6-0.4*mp)/0.6;a=`Média ${f1(mp)}${e3==null?' (contando a P3 como 0)':''}. Na recuperação, ele precisa de ${r>10?'mais de 10':f1(r)}.`+(e3==null?' Cada ponto na P3 baixa essa meta em 0,2. A recuperação pesa 60% e cobre o semestre todo.':'')}}
+ $('#edoRes').textContent=a;
+ const s=['s1','s2','s3','s4'].map(k=>num(n[k])),L=num(n.sl),Lu=L??10,known=s.reduce((t,x)=>t+(x??0),0);let b;
+ if(s[1]==null||s[2]==null)b=`Até agora: ${f1(0.225*known)} de 6 pontos. Quando saírem a P2 e a P3, lance aqui para ver quanto ele precisa na P4. As listas valem 1 ponto inteiro da média, o mesmo que 4,4 pontos numa prova.`;
+ else if(s[3]==null){const need=(6-0.1*Lu-0.225*(s[0]+s[1]+s[2]))/0.225;
+  b=need<=0?'Já passou, mesmo com 0 na P4.':need>10?`Nem com 10 na P4 chega a 6${L==null?' (supondo listas = 10)':''}: a substitutiva vira o plano B (nota máxima 6,0).`:`Precisa de ${f1(need)} na P4${L==null?', supondo as listas completas (10)':''}.`}
+ else{const fin=0.225*(s[0]+s[1]+s[2]+s[3])+0.1*Lu;b=`Média final: ${f1(fin)}.`+(fin<6?' A substitutiva troca a menor prova; passando por ela, a nota máxima é 6,0.':' Aprovado!')}
+ $('#estRes').textContent=b}
+const MAPA=[['EDO',['1ª ordem: separáveis','1ª ordem: lineares (fator integrante)','1ª ordem: exatas','1ª ordem: homogêneas','2ª ordem: coeficientes indeterminados','2ª ordem: variação de parâmetros','Método de Euler e PVI','Laplace: propriedades','Laplace: resolver PVI','Autovalores e autovetores','Sistemas homogêneos','Sistemas não homogêneos']],
+['Estática',['Centroide de figuras compostas','Inércia de áreas e eixos paralelos','Produto de inércia e eixos inclinados','Círculo de Mohr e momentos principais','Inércia de massa','Trabalho virtual','Atrito seco (calços, parafusos, correias)','Centro de gravidade e de massa','Carregamento distribuído e pressão de fluidos','Momento de inércia por integração','DCL e equilíbrio de corpo rígido','Treliças (nós e seções)','Estruturas e máquinas','Forças internas e diagramas']]];
+const ST=['Marcar','Não sei','Mais ou menos','Sei'];
+function drawMapa(){$('#mapa').innerHTML=MAPA.map(([g,l])=>{const c=[1,2,3].map(v=>l.filter(t=>(S.map[t]||0)===v).length);return `<div class="panel brick"><h3>${g}</h3><p class="hint">${c[0]} não sei · ${c[1]} mais ou menos · ${c[2]} sei</p>`+l.map(t=>{const v=S.map[t]||0;return `<div class="tp"><span>${t}</span><button type="button" class="chip s${v}" data-tp="${t}">${ST[v]}</button></div>`}).join('')+'</div>'}).join('')}
+let tt;function toast(s){const e=$('#toast');e.textContent=s;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),3200)}
+function view(){const m=/^#d-(\d{4}-\d{2}-\d{2})$/.exec(location.hash);return m&&inRange(m[1])?m[1]:null}
+function render(){const st=stats();header(st);const k=view(),mp=location.hash==='#mapa';$('#cal').hidden=!!k||mp;$('#day').hidden=!k;$('#mapaView').hidden=!mp||!!k;if(k)renderDay(k);else if(mp)drawMapa();else renderCal(st);drawT()}
+function go(k){const h=k?'#d-'+k:'#calendario';if(location.hash===h)render();else location.hash=h;window.scrollTo(0,0)}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+document.addEventListener('click',e=>{
+ if(e.target.closest('[data-map]')){location.hash='#mapa';window.scrollTo(0,0);return}
+ if(e.target.closest('#mback')&&ACT){const[k,i]=ACT.split('#');sel[k]=+i}
+ const g=e.target.closest('[data-go]');if(g&&!g.disabled){go(g.dataset.go);return}
+ const s=e.target.closest('[data-sel]');if(s){const k=view();sel[k]=+s.dataset.sel;renderDay(k);return}
+ if(e.target.closest('#tgo')){tog(T);return}
+ if(e.target.closest('#mgo')){tog(TMS[ACT]);return}
+ if(e.target.closest('#tskip')){if(!T||T.phase!=='foco')return;beep();if(T.si<T.segs.length-1){nextSeg(T);if(!T.run)T.left=T.segs[T.si].m*60}else{T.phase='pausa';T.left=600;T.end=Date.now()+600000;toast('Foco cumprido! Pausa de 10 min.')}saveT();drawT();return}
+ if(e.target.closest('#treset')){if(T){T.run=false;T.phase='idle';T.si=0;T.left=T.segs[0].m*60}saveT();renderDay(view());return}
+ const dn=e.target.closest('#done,[data-tick]');if(dn){const id=dn.dataset.id||dn.dataset.tick,b=stats(),was=!!S.done[id];
+  if(was)delete S.done[id];else S.done[id]=true;save();const a=stats(),k=view();
+  if(!was){const na=ACH.find((x,i)=>a.ach[i]&&!b.ach[i]);
+   toast(na?'Conquista desbloqueada: '+na.n+'!':a.lvl>b.lvl?`Subiu para o nível ${a.lvl}: ${a.rank}!`:dayDone(k)?'Dia completo! Selo conquistado. Pode jogar.':`+${a.pts-b.pts} pontos!`);
+   const ts=tasksOf(k),nx=ts.findIndex(x=>!S.done[x.id]);if(nx>=0)sel[k]=nx;
+   const X=TMS[id];if(X&&X.phase!=='idle'){X.run=false;X.phase='idle';X.si=0;X.left=X.segs[0].m*60;saveT()}}
+  render();const nb=$('#done');if(nb&&!was)nb.classList.add('pop');return}
+ const r=e.target.closest('#reset');if(r){if(r.dataset.c){S=DEF();save();r.textContent='Zerar progresso';delete r.dataset.c;render();toast('Progresso zerado.')}
+  else{r.dataset.c=1;r.textContent='Tem certeza? Clique de novo para zerar';setTimeout(()=>{if(r.dataset.c){delete r.dataset.c;r.textContent='Zerar progresso'}},5000)}}});
+document.addEventListener('input',e=>{const n=e.target.dataset.n;if(!n)return;S.notas[n]=e.target.value;save();drawNotas()});
+document.addEventListener('click',e=>{const c=e.target.closest('[data-tp]');if(!c)return;const t=c.dataset.tp;S.map[t]=((S.map[t]||0)%3)+1;save();drawMapa()});
+document.addEventListener('keydown',e=>{if(location.hash==='#mapa'&&e.key==='Escape'){go('');return}const k=view();if(!k||e.target.closest('input,textarea'))return;
+ if(e.key==='ArrowLeft'&&inRange(shift(k,-1)))go(shift(k,-1));if(e.key==='ArrowRight'&&inRange(shift(k,1)))go(shift(k,1));if(e.key==='Escape')go('')});
+render();
+}
+</script>
+</body>
+</html>
